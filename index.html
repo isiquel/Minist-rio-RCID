@@ -1,0 +1,296 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ministério RCID | Gestão Oficial</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        :root { 
+            --primary: #2563eb; 
+            --primary-hover: #1d4ed8;
+            --dark: #0f172a; 
+            --bg: #f8fafc; 
+            --white: #ffffff; 
+            --warn: #f59e0b; 
+            --success: #10b981;
+            --text-main: #1e293b;
+            --text-muted: #64748b;
+        }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Inter', sans-serif; }
+        body { background: var(--bg); color: var(--text-main); display: flex; min-height: 100vh; }
+
+        /* --- TYPOGRAPHY & BUTTONS --- */
+        h1 { font-weight: 800; font-size: 1.8rem; color: var(--dark); margin-bottom: 20px; }
+        h3 { font-weight: 700; font-size: 1.1rem; margin-bottom: 15px; color: var(--dark); }
+        
+        .btn-action { 
+            background: var(--primary); color: white; border: none; padding: 12px 20px; 
+            border-radius: 10px; font-weight: 600; cursor: pointer; transition: 0.2s;
+            display: inline-flex; align-items: center; justify-content: center; gap: 8px;
+        }
+        .btn-action:hover { background: var(--primary-hover); transform: translateY(-1px); box-shadow: 0 4px 12px rgba(37, 99, 235, 0.2); }
+
+        input, select { 
+            width: 100%; padding: 12px; border-radius: 10px; border: 1px solid #e2e8f0; 
+            outline: none; background: #ffffff; font-size: 0.9rem;
+        }
+
+        /* --- AUTH --- */
+        #auth-screen { position: fixed; inset: 0; background: var(--dark); display: flex; align-items: center; justify-content: center; z-index: 9999; }
+        .auth-card { background: var(--white); padding: 40px; border-radius: 24px; width: 95%; max-width: 400px; box-shadow: 0 25px 50px rgba(0,0,0,0.5); }
+
+        /* --- LAYOUT --- */
+        aside { width: 280px; background: var(--dark); color: white; display: flex; flex-direction: column; position: fixed; height: 100vh; padding: 30px 20px; z-index: 100; }
+        main { flex: 1; margin-left: 280px; padding: 40px; max-width: calc(100vw - 280px); }
+        #app-content { display: none; width: 100%; }
+
+        .nav-btn { 
+            width: 100%; padding: 12px 16px; border-radius: 10px; border: none; background: transparent; 
+            color: #94a3b8; text-align: left; cursor: pointer; margin-bottom: 5px; font-weight: 500;
+        }
+        .nav-btn.active { background: var(--primary); color: white; font-weight: 600; }
+
+        .card { background: var(--white); padding: 25px; border-radius: 16px; border: 1px solid #edf2f7; margin-bottom: 25px; box-shadow: 0 1px 3px rgba(0,0,0,0.02); }
+        .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px; margin-bottom: 15px; }
+
+        /* --- TABLES --- */
+        table { width: 100%; border-collapse: separate; border-spacing: 0; margin-top: 10px; }
+        th { text-align: left; padding: 14px; background: #f8fafc; font-size: 0.75rem; font-weight: 700; text-transform: uppercase; color: var(--text-muted); border-bottom: 1px solid #e2e8f0; }
+        td { padding: 16px 14px; border-bottom: 1px solid #f1f5f9; font-size: 0.9rem; }
+
+        .btn-whatsapp { background: #22c55e; color: white; text-decoration: none; padding: 6px 12px; border-radius: 8px; font-size: 0.7rem; font-weight: 700; display: inline-flex; align-items: center; gap: 5px; }
+
+        .section { display: none; }
+        .section.active { display: block; animation: fadeIn 0.3s ease-out; }
+
+        .creator-only, .admin-only { display: none !important; }
+        .is-admin .admin-only { display: flex !important; }
+        .is-creator .creator-only { display: flex !important; }
+        .is-admin .admin-only-table { display: table-cell !important; }
+
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; } }
+
+        @media print {
+            aside, .no-print, .btn-action { display: none !important; }
+            main { margin-left: 0; padding: 0; }
+            .card { border: none; box-shadow: none; }
+        }
+    </style>
+</head>
+<body id="app-body">
+
+<div id="auth-screen">
+    <div class="auth-card">
+        <h2 style="text-align:center; color:var(--primary); margin-bottom:25px; font-weight:800">MINISTÉRIO RCID</h2>
+        
+        <div id="sec-login-box">
+            <input type="email" id="sec-email" placeholder="E-mail">
+            <input type="password" id="sec-pass" placeholder="Senha">
+            <button class="btn-action" style="width:100%" onclick="loginSecretario()">Entrar</button>
+            <div style="margin-top:20px; padding-top:20px; border-top:1px solid #eee; text-align:center">
+                <button class="btn-action" style="width:100%; background:#f1f5f9; color:var(--text-main)" onclick="showVisitorLogin()">Acesso Membro/Visitante</button>
+            </div>
+            <p style="margin-top:15px; font-size:0.8rem; text-align:center">Novo Oficial? <a href="#" onclick="toggleSecAction('reg')" style="color:var(--primary); font-weight:700">Solicitar Registro</a></p>
+        </div>
+
+        <div id="sec-reg-box" style="display:none">
+            <h3 style="text-align:center">Registrar Oficial</h3>
+            <input type="text" id="reg-nome" placeholder="Nome Completo">
+            <input type="email" id="reg-email" placeholder="E-mail">
+            <input type="password" id="reg-pass" placeholder="Criar Senha">
+            <button class="btn-action" style="width:100%" onclick="registerSecretario()">Enviar Solicitação</button>
+            <p onclick="toggleSecAction('login')" style="text-align:center; margin-top:15px; cursor:pointer; font-size:0.8rem; color:var(--text-muted)">Voltar</p>
+        </div>
+
+        <div id="visitor-box" style="display:none">
+            <h3 style="text-align:center">Área do Membro</h3>
+            <input type="password" id="visitor-key" placeholder="Senha da Igreja">
+            <button class="btn-action" style="width:100%" onclick="loginVisitor()">Acessar</button>
+            <p onclick="showDefaultLogin()" style="text-align:center; margin-top:15px; cursor:pointer; font-size:0.8rem; color:var(--text-muted)">Voltar</p>
+        </div>
+    </div>
+</div>
+
+<div id="app-content">
+    <aside>
+        <div style="font-weight:900; font-size:1.3rem; color:var(--white); margin-bottom:35px; border-left:4px solid var(--primary); padding-left:15px">MINISTÉRIO RCID</div>
+        <nav>
+            <button class="nav-btn active" onclick="tab('dash', this)">🖼️ Mural / Avisos</button>
+            <button class="nav-btn" onclick="tab('list', this)">📋 Livro Ministerial</button>
+            <button class="nav-btn" onclick="tab('escala', this)">🗓️ Escalas Oficiais</button>
+            <button class="nav-btn admin-only" onclick="tab('conf', this)">⚙️ Configurações</button>
+            <button class="nav-btn creator-only" onclick="tab('gestao', this)" style="color:var(--warn)">🔑 Gestão de Oficiais</button>
+        </nav>
+        <div style="margin-top:auto">
+            <div id="user-info" style="font-size:0.7rem; color:#94a3b8; font-weight:700; margin-bottom:10px; text-transform:uppercase"></div>
+            <button class="nav-btn" onclick="location.reload()" style="color:#f87171">🚪 Sair</button>
+        </div>
+    </aside>
+
+    <main>
+        <section id="dash" class="section active">
+            <h1>Mural da Igreja</h1>
+            <div class="admin-only card no-print" style="border: 1px dashed var(--primary)">
+                <h3>Postar Cartaz</h3>
+                <div class="grid">
+                    <input type="file" id="cartaz-file" accept="image/*">
+                    <input type="text" id="cartaz-titulo" placeholder="Título da Campanha/Aviso">
+                </div>
+                <button class="btn-action" onclick="uploadCartaz()">Publicar no Mural</button>
+            </div>
+            <div id="mural-container" class="grid"></div>
+        </section>
+
+        <section id="list" class="section">
+            <h1>Livro Ministerial</h1>
+            <div class="card admin-only">
+                <h3>Novo Cadastro</h3>
+                <div class="grid">
+                    <input type="text" id="m-nome" placeholder="Nome Completo">
+                    <input type="tel" id="m-tel" placeholder="WhatsApp (DDD + Número)">
+                    <select id="m-cargo">
+                        <option value="">Cargo Ministerial...</option>
+                        <option>Pastor(a)</option><option>Evangelista</option><option>Missionário(a)</option>
+                        <option>Presbítero</option><option>Diácono(a)</option><option>Músico / Levita</option>
+                        <option>Cooperador(a)</option><option>Membro</option>
+                    </select>
+                    <input type="text" id="m-end" placeholder="Endereço">
+                </div>
+                <button class="btn-action" onclick="addMember()">Registrar Membro</button>
+            </div>
+            <div class="card">
+                <table>
+                    <thead><tr><th>Nome</th><th>Cargo</th><th class="admin-only admin-only-table">Contato & Endereço</th><th class="admin-only admin-only-table">Ação</th></tr></thead>
+                    <tbody id="body-m"></tbody>
+                </table>
+            </div>
+        </section>
+
+        <section id="escala" class="section">
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:20px">
+                <h1>Escalas de Culto</h1>
+                <button class="btn-action no-print" style="background:var(--dark)" onclick="window.print()">🖨️ Imprimir</button>
+            </div>
+            
+            <div class="card admin-only no-print">
+                <h3>Novo Culto na Escala</h3>
+                <div class="grid">
+                    <input type="date" id="e-data">
+                    <select id="e-dep">
+                        <option value="">Departamento Responsável...</option>
+                        <option>Culto Oficial</option>
+                        <option>Departamento Infantil</option>
+                        <option>Jovens</option>
+                        <option>Círculo de Oração</option>
+                        <option>Missões</option>
+                        <option>Culto de Oração</option>
+                        <option>Culto de Libertação</option>
+                        <option>Culto no Lar</option>
+                    </select>
+                    <input type="text" id="e-p1" placeholder="Porteiro(a)">
+                    <input type="text" id="e-dir" placeholder="Dirigente (1ª Parte)">
+                    <input type="text" id="e-pre" placeholder="Pregador(a)">
+                </div>
+                <button class="btn-action" onclick="addScale()">Salvar Escala</button>
+            </div>
+
+            <div class="card">
+                <table id="table-escala-print">
+                    <thead>
+                        <tr>
+                            <th>Data</th>
+                            <th>Culto / Departamento</th>
+                            <th>Porteiro</th>
+                            <th>Dirigente (1ª Parte)</th>
+                            <th>Pregador</th>
+                            <th class="admin-only admin-only-table">Ação</th>
+                        </tr>
+                    </thead>
+                    <tbody id="body-e"></tbody>
+                </table>
+            </div>
+        </section>
+
+        <section id="gestao" class="section creator-only">
+            <h1>Gestão de Oficiais</h1>
+            <div class="card"><table style="width:100%"><thead><tr><th>Nome</th><th>E-mail</th><th>Status</th><th>Ação</th></tr></thead><tbody id="body-gestao"></tbody></table></div>
+        </section>
+
+        <section id="conf" class="section admin-only">
+            <h1>Configurações</h1>
+            <div class="card" style="max-width:400px">
+                <label>Chave de Acesso dos Membros</label>
+                <input type="text" id="conf-key">
+                <button class="btn-action" style="width:100%; margin-top:10px" onclick="updateKey()">Salvar</button>
+            </div>
+        </section>
+    </main>
+</div>
+
+<script>
+    let isAdmin = false;
+    let isCreator = false;
+
+    let db = JSON.parse(localStorage.getItem('rcid_master_final')) || {
+        members: [], escalas: [], cartazes: [], secrets: [], config: { visitorKey: "RCId" }
+    };
+
+    function showVisitorLogin() { document.getElementById('sec-login-box').style.display = 'none'; document.getElementById('visitor-box').style.display = 'block'; }
+    function showDefaultLogin() { document.getElementById('sec-login-box').style.display = 'block'; document.getElementById('visitor-box').style.display = 'none'; }
+    function toggleSecAction(mode) { document.getElementById('sec-login-box').style.display = mode === 'login' ? 'block' : 'none'; document.getElementById('sec-reg-box').style.display = mode === 'reg' ? 'block' : 'none'; }
+
+    function registerSecretario() {
+        const email = document.getElementById('reg-email').value;
+        const ehPrimeiro = db.secrets.length === 0;
+        db.secrets.push({ nome: document.getElementById('reg-nome').value, email, pass: document.getElementById('reg-pass').value, aprovado: ehPrimeiro, criador: ehPrimeiro });
+        sync(); alert(ehPrimeiro ? "Você é o Criador!" : "Solicitação enviada!"); toggleSecAction('login');
+    }
+
+    function loginSecretario() {
+        const u = db.secrets.find(s => s.email === document.getElementById('sec-email').value && s.pass === document.getElementById('sec-pass').value);
+        if(u) { if(u.aprovado) { isAdmin = true; isCreator = u.criador; startApp(u.nome); } else { alert("Aguarde aprovação."); } } else { alert("Erro!"); }
+    }
+
+    function loginVisitor() { if(document.getElementById('visitor-key').value === db.config.visitorKey) { isAdmin = false; isCreator = false; startApp("Visitante"); } else { alert("Chave incorreta!"); } }
+
+    function startApp(nome) {
+        document.getElementById('auth-screen').style.display = 'none'; document.getElementById('app-content').style.display = 'flex';
+        document.getElementById('user-info').innerText = nome;
+        if(isAdmin) document.getElementById('app-body').classList.add('is-admin');
+        if(isCreator) { document.getElementById('app-body').classList.add('is-creator'); document.getElementById('conf-key').value = db.config.visitorKey; }
+        render();
+    }
+
+    function sync() { localStorage.setItem('rcid_master_final', JSON.stringify(db)); render(); }
+
+    function addMember() {
+        db.members.push({ id: Date.now(), nome: document.getElementById('m-nome').value, cargo: document.getElementById('m-cargo').value, tel: document.getElementById('m-tel').value, end: document.getElementById('m-end').value });
+        sync(); ['m-nome','m-tel','m-end'].forEach(i => document.getElementById(i).value = '');
+    }
+
+    function addScale() {
+        db.escalas.push({ id: Date.now(), data: document.getElementById('e-data').value, dep: document.getElementById('e-dep').value, p1: document.getElementById('e-p1').value, dir: document.getElementById('e-dir').value, pre: document.getElementById('e-pre').value });
+        db.escalas.sort((a,b) => new Date(a.data) - new Date(b.data));
+        sync();
+    }
+
+    function render() {
+        document.getElementById('mural-container').innerHTML = db.cartazes.map(c => `<div class="card" style="padding:10px"><img src="${c.img}" style="width:100%; border-radius:10px"><div style="display:flex; justify-content:space-between; margin-top:10px"><span>${c.tit}</span><button class="admin-only" onclick="del('cartazes', ${c.id})" style="color:red; background:none; border:none">🗑️</button></div></div>`).join('');
+        
+        document.getElementById('body-m').innerHTML = db.members.map(m => `<tr><td><strong>${m.nome}</strong></td><td>${m.cargo}</td><td class="admin-only admin-only-table">${m.end}<br><a href="https://wa.me/55${m.tel.replace(/\D/g,'')}" target="_blank" class="btn-whatsapp">WhatsApp</a></td><td class="admin-only admin-only-table"><button onclick="del('members', ${m.id})" style="color:red; border:none; background:none">Excluir</button></td></tr>`).join('');
+
+        document.getElementById('body-e').innerHTML = db.escalas.map(e => `<tr><td>${e.data.split('-').reverse().join('/')}</td><td><strong>${e.dep}</strong></td><td>${e.p1}</td><td>${e.dir}</td><td><strong>${e.pre}</strong></td><td class="admin-only admin-only-table"><button onclick="del('escalas', ${e.id})" style="color:red; border:none; background:none">X</button></td></tr>`).join('');
+
+        if(isCreator) { document.getElementById('body-gestao').innerHTML = db.secrets.map(s => s.criador ? '' : `<tr><td>${s.nome}</td><td>${s.email}</td><td>${s.aprovado ? 'ATIVO' : 'PENDENTE'}</td><td><button onclick="toggleStatus('${s.email}')">${s.aprovado ? 'Bloquear' : 'Aprovar'}</button></td></tr>`).join(''); }
+    }
+
+    function toggleStatus(email) { const s = db.secrets.find(x => x.email === email); s.aprovado = !s.aprovado; sync(); }
+    function uploadCartaz() { const f = document.getElementById('cartaz-file').files[0]; const r = new FileReader(); r.onload = e => { db.cartazes.unshift({id: Date.now(), img: e.target.result, tit: document.getElementById('cartaz-titulo').value}); sync(); }; if(f) r.readAsDataURL(f); }
+    function del(t, id) { if(confirm("Remover?")) { db[t] = db[t].filter(i => i.id !== id); sync(); } }
+    function tab(id, btn) { document.querySelectorAll('.section').forEach(s => s.classList.remove('active')); document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active')); document.getElementById(id).classList.add('active'); btn.classList.add('active'); }
+    function updateKey() { db.config.visitorKey = document.getElementById('conf-key').value; sync(); alert("OK!"); }
+</script>
+</body>
+</html>
