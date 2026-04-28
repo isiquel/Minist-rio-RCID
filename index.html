@@ -3,294 +3,263 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Ministério RCID | Gestão Oficial</title>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <title>RCID BIBLE | Ministerial Pro</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;800&display=swap" rel="stylesheet">
     <style>
-        :root { 
-            --primary: #2563eb; 
-            --primary-hover: #1d4ed8;
-            --dark: #0f172a; 
-            --bg: #f8fafc; 
-            --white: #ffffff; 
-            --warn: #f59e0b; 
-            --success: #10b981;
-            --text-main: #1e293b;
-            --text-muted: #64748b;
+        :root {
+            --bg-dark: #0a0b0d;
+            --glass: rgba(255, 255, 255, 0.08);
+            --gold: #c5a059;
+            --gold-light: #e2c285;
+            --text: #e0e0e0;
+            --danger: #ff4d4d;
         }
 
-        * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Inter', sans-serif; }
-        body { background: var(--bg); color: var(--text-main); display: flex; min-height: 100vh; }
+        * { box-sizing: border-box; margin: 0; padding: 0; transition: 0.2s; -webkit-tap-highlight-color: transparent; }
 
-        /* --- TYPOGRAPHY & BUTTONS --- */
-        h1 { font-weight: 800; font-size: 1.8rem; color: var(--dark); margin-bottom: 20px; }
-        h3 { font-weight: 700; font-size: 1.1rem; margin-bottom: 15px; color: var(--dark); }
+        body {
+            font-family: 'Poppins', sans-serif;
+            background: var(--bg-dark);
+            color: var(--text);
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
+
+        /* Menu Superior */
+        .nav-header { background: #0f1014; border-bottom: 1px solid var(--glass); padding: 10px 5px; }
+        .nav-tabs { display: grid; grid-template-columns: repeat(6, 1fr); gap: 4px; max-width: 950px; margin: 0 auto; }
+        .tab-btn {
+            background: var(--glass); border: 1px solid rgba(255,255,255,0.1); color: var(--text);
+            padding: 10px 1px; border-radius: 8px; font-size: 8px; font-weight: 600; text-transform: uppercase; text-align: center; cursor: pointer;
+        }
+        .tab-btn.active { background: linear-gradient(135deg, var(--gold), var(--gold-light)); color: #000; }
+
+        .content-wrapper { flex: 1; position: relative; overflow: hidden; }
+        .view-section { position: absolute; top: 0; left: 0; width: 100%; height: 100%; padding: 20px; display: none; flex-direction: column; overflow-y: auto; }
+        .view-section.active { display: flex; }
+
+        /* Esboços e Sermões */
+        .sermon-item { background: var(--glass); padding: 15px; border-radius: 12px; margin-bottom: 10px; display: flex; justify-content: space-between; align-items: center; border-left: 4px solid var(--gold); }
+        .delete-btn { color: var(--danger); font-weight: bold; padding: 5px 10px; cursor: pointer; font-size: 14px; }
         
-        .btn-action { 
-            background: var(--primary); color: white; border: none; padding: 12px 20px; 
-            border-radius: 10px; font-weight: 600; cursor: pointer; transition: 0.2s;
-            display: inline-flex; align-items: center; justify-content: center; gap: 8px;
-        }
-        .btn-action:hover { background: var(--primary-hover); transform: translateY(-1px); box-shadow: 0 4px 12px rgba(37, 99, 235, 0.2); }
+        #readingOverlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: var(--bg-dark); z-index: 2000; padding: 30px 20px; overflow-y: auto; }
+        .reading-title { color: var(--gold); font-size: 24px; margin-bottom: 20px; border-bottom: 1px solid var(--gold); padding-bottom: 10px; }
+        .reading-body { font-size: 18px; line-height: 1.8; white-space: pre-wrap; color: #fff; padding-bottom: 80px; }
 
-        input, select { 
-            width: 100%; padding: 12px; border-radius: 10px; border: 1px solid #e2e8f0; 
-            outline: none; background: #ffffff; font-size: 0.9rem;
-        }
+        /* Bíblia */
+        .swipe-guide { text-align: center; font-size: 10px; color: var(--gold); margin: 10px 0; opacity: 0.7; letter-spacing: 1px; font-weight: 600; }
+        .verse-line { margin-bottom: 12px; padding: 10px; border-radius: 10px; line-height: 1.8; border-bottom: 1px solid rgba(255,255,255,0.02); }
+        .v-num { color: var(--gold); font-weight: bold; margin-right: 12px; }
+        .has-note { border-left: 4px solid var(--gold); background: rgba(197, 160, 89, 0.05); }
+        .note-tag { color: var(--gold); font-size: 10px; margin-left: 10px; cursor: pointer; text-decoration: underline; }
 
-        /* --- AUTH --- */
-        #auth-screen { position: fixed; inset: 0; background: var(--dark); display: flex; align-items: center; justify-content: center; z-index: 9999; }
-        .auth-card { background: var(--white); padding: 40px; border-radius: 24px; width: 95%; max-width: 400px; box-shadow: 0 25px 50px rgba(0,0,0,0.5); }
+        /* Cards */
+        .card { background: var(--glass); padding: 20px; border-radius: 25px; border: 1px solid rgba(255,255,255,0.05); margin-bottom: 15px; }
+        select, input, textarea { width: 100%; background: #15161a; border: 1px solid rgba(255,255,255,0.1); color: white; padding: 15px; border-radius: 14px; margin-bottom: 15px; font-size: 16px; outline: none; }
+        
+        .action-btn { width: 100%; background: linear-gradient(135deg, var(--gold), var(--gold-light)); border: none; padding: 16px; border-radius: 14px; font-weight: bold; cursor: pointer; color: #000; text-transform: uppercase; }
 
-        /* --- LAYOUT --- */
-        aside { width: 280px; background: var(--dark); color: white; display: flex; flex-direction: column; position: fixed; height: 100vh; padding: 30px 20px; z-index: 100; }
-        main { flex: 1; margin-left: 280px; padding: 40px; max-width: calc(100vw - 280px); }
-        #app-content { display: none; width: 100%; }
+        #notePopup { display: none; position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); width: 85%; max-width: 400px; background: #1a1c20; padding: 25px; border-radius: 25px; border: 1px solid var(--gold); z-index: 3000; }
+        .overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.85); z-index: 2500; }
 
-        .nav-btn { 
-            width: 100%; padding: 12px 16px; border-radius: 10px; border: none; background: transparent; 
-            color: #94a3b8; text-align: left; cursor: pointer; margin-bottom: 5px; font-weight: 500;
-        }
-        .nav-btn.active { background: var(--primary); color: white; font-weight: 600; }
+        .progress-bar { height: 100%; background: var(--gold); width: 0%; transition: width 0.8s; }
+        .progress-container { background: rgba(255,255,255,0.05); border-radius: 10px; height: 6px; margin-bottom: 5px; overflow: hidden; }
 
-        .card { background: var(--white); padding: 25px; border-radius: 16px; border: 1px solid #edf2f7; margin-bottom: 25px; box-shadow: 0 1px 3px rgba(0,0,0,0.02); }
-        .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px; margin-bottom: 15px; }
-
-        /* --- TABLES --- */
-        table { width: 100%; border-collapse: separate; border-spacing: 0; margin-top: 10px; }
-        th { text-align: left; padding: 14px; background: #f8fafc; font-size: 0.75rem; font-weight: 700; text-transform: uppercase; color: var(--text-muted); border-bottom: 1px solid #e2e8f0; }
-        td { padding: 16px 14px; border-bottom: 1px solid #f1f5f9; font-size: 0.9rem; }
-
-        .btn-whatsapp { background: #22c55e; color: white; text-decoration: none; padding: 6px 12px; border-radius: 8px; font-size: 0.7rem; font-weight: 700; display: inline-flex; align-items: center; gap: 5px; }
-
-        .section { display: none; }
-        .section.active { display: block; animation: fadeIn 0.3s ease-out; }
-
-        .creator-only, .admin-only { display: none !important; }
-        .is-admin .admin-only { display: flex !important; }
-        .is-creator .creator-only { display: flex !important; }
-        .is-admin .admin-only-table { display: table-cell !important; }
-
-        @keyframes fadeIn { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; } }
-
-        @media print {
-            aside, .no-print, .btn-action { display: none !important; }
-            main { margin-left: 0; padding: 0; }
-            .card { border: none; box-shadow: none; }
-        }
+        ::-webkit-scrollbar { width: 4px; }
+        ::-webkit-scrollbar-thumb { background: var(--gold); border-radius: 10px; }
     </style>
 </head>
-<body id="app-body">
+<body>
 
-<div id="auth-screen">
-    <div class="auth-card">
-        <h2 style="text-align:center; color:var(--primary); margin-bottom:25px; font-weight:800">MINISTÉRIO RCID</h2>
-        
-        <div id="sec-login-box">
-            <input type="email" id="sec-email" placeholder="E-mail">
-            <input type="password" id="sec-pass" placeholder="Senha">
-            <button class="btn-action" style="width:100%" onclick="loginSecretario()">Entrar</button>
-            <div style="margin-top:20px; padding-top:20px; border-top:1px solid #eee; text-align:center">
-                <button class="btn-action" style="width:100%; background:#f1f5f9; color:var(--text-main)" onclick="showVisitorLogin()">Acesso Membro/Visitante</button>
-            </div>
-            <p style="margin-top:15px; font-size:0.8rem; text-align:center">Novo Oficial? <a href="#" onclick="toggleSecAction('reg')" style="color:var(--primary); font-weight:700">Solicitar Registro</a></p>
+    <header class="nav-header">
+        <div class="nav-tabs">
+            <button class="tab-btn active" onclick="switchView('home')">Busca</button>
+            <button class="tab-btn" onclick="switchView('leitura')">Bíblia</button>
+            <button class="tab-btn" onclick="switchView('esboços')">Esboços</button>
+            <button class="tab-btn" onclick="switchView('dicionario')">Dicio</button>
+            <button class="tab-btn" onclick="switchView('estudos')">Religião</button>
+            <button class="tab-btn" onclick="switchView('biblioteca')">Livros</button>
         </div>
+    </header>
 
-        <div id="sec-reg-box" style="display:none">
-            <h3 style="text-align:center">Registrar Oficial</h3>
-            <input type="text" id="reg-nome" placeholder="Nome Completo">
-            <input type="email" id="reg-email" placeholder="E-mail">
-            <input type="password" id="reg-pass" placeholder="Criar Senha">
-            <button class="btn-action" style="width:100%" onclick="registerSecretario()">Enviar Solicitação</button>
-            <p onclick="toggleSecAction('login')" style="text-align:center; margin-top:15px; cursor:pointer; font-size:0.8rem; color:var(--text-muted)">Voltar</p>
-        </div>
-
-        <div id="visitor-box" style="display:none">
-            <h3 style="text-align:center">Área do Membro</h3>
-            <input type="password" id="visitor-key" placeholder="Senha da Igreja">
-            <button class="btn-action" style="width:100%" onclick="loginVisitor()">Acessar</button>
-            <p onclick="showDefaultLogin()" style="text-align:center; margin-top:15px; cursor:pointer; font-size:0.8rem; color:var(--text-muted)">Voltar</p>
-        </div>
-    </div>
-</div>
-
-<div id="app-content">
-    <aside>
-        <div style="font-weight:900; font-size:1.3rem; color:var(--white); margin-bottom:35px; border-left:4px solid var(--primary); padding-left:15px">MINISTÉRIO RCID</div>
-        <nav>
-            <button class="nav-btn active" onclick="tab('dash', this)">🖼️ Mural / Avisos</button>
-            <button class="nav-btn" onclick="tab('list', this)">📋 Livro Ministerial</button>
-            <button class="nav-btn" onclick="tab('escala', this)">🗓️ Escalas Oficiais</button>
-            <button class="nav-btn admin-only" onclick="tab('conf', this)">⚙️ Configurações</button>
-            <button class="nav-btn creator-only" onclick="tab('gestao', this)" style="color:var(--warn)">🔑 Gestão de Oficiais</button>
-        </nav>
-        <div style="margin-top:auto">
-            <div id="user-info" style="font-size:0.7rem; color:#94a3b8; font-weight:700; margin-bottom:10px; text-transform:uppercase"></div>
-            <button class="nav-btn" onclick="location.reload()" style="color:#f87171">🚪 Sair</button>
-        </div>
-    </aside>
-
-    <main>
-        <section id="dash" class="section active">
-            <h1>Mural da Igreja</h1>
-            <div class="admin-only card no-print" style="border: 1px dashed var(--primary)">
-                <h3>Postar Cartaz</h3>
-                <div class="grid">
-                    <input type="file" id="cartaz-file" accept="image/*">
-                    <input type="text" id="cartaz-titulo" placeholder="Título da Campanha/Aviso">
-                </div>
-                <button class="btn-action" onclick="uploadCartaz()">Publicar no Mural</button>
-            </div>
-            <div id="mural-container" class="grid"></div>
-        </section>
-
-        <section id="list" class="section">
-            <h1>Livro Ministerial</h1>
-            <div class="card admin-only">
-                <h3>Novo Cadastro</h3>
-                <div class="grid">
-                    <input type="text" id="m-nome" placeholder="Nome Completo">
-                    <input type="tel" id="m-tel" placeholder="WhatsApp (DDD + Número)">
-                    <select id="m-cargo">
-                        <option value="">Cargo Ministerial...</option>
-                        <option>Pastor(a)</option><option>Evangelista</option><option>Missionário(a)</option>
-                        <option>Presbítero</option><option>Diácono(a)</option><option>Músico / Levita</option>
-                        <option>Cooperador(a)</option><option>Membro</option>
-                    </select>
-                    <input type="text" id="m-end" placeholder="Endereço">
-                </div>
-                <button class="btn-action" onclick="addMember()">Registrar Membro</button>
-            </div>
+    <main class="content-wrapper">
+        <section id="view-home" class="view-section active">
+            <h1 style="text-align:center; font-weight:800; color:var(--gold); margin-bottom:20px;">RCID BIBLE</h1>
             <div class="card">
-                <table>
-                    <thead><tr><th>Nome</th><th>Cargo</th><th class="admin-only admin-only-table">Contato & Endereço</th><th class="admin-only admin-only-table">Ação</th></tr></thead>
-                    <tbody id="body-m"></tbody>
-                </table>
+                <select id="bookSelect">
+                    <optgroup label="Antigo Testamento">
+                        <option value="Gênesis">Gênesis</option><option value="Êxodo">Êxodo</option><option value="Levítico">Levítico</option><option value="Números">Números</option><option value="Deuteronômio">Deuteronômio</option><option value="Josué">Josué</option><option value="Juízes">Juízes</option><option value="Rute">Rute</option><option value="1 Samuel">1 Samuel</option><option value="2 Samuel">2 Samuel</option><option value="1 Reis">1 Reis</option><option value="2 Reis">2 Reis</option><option value="1 Crônicas">1 Crônicas</option><option value="2 Crônicas">2 Crônicas</option><option value="Esdras">Esdras</option><option value="Neemias">Neemias</option><option value="Ester">Ester</option><option value="Jó">Jó</option><option value="Salmos">Salmos</option><option value="Provérbios">Provérbios</option><option value="Eclesiastes">Eclesiastes</option><option value="Cantares">Cantares</option><option value="Isaías">Isaías</option><option value="Jeremias">Jeremias</option><option value="Lamentações">Lamentações</option><option value="Ezequiel">Ezequiel</option><option value="Daniel">Daniel</option><option value="Oseias">Oseias</option><option value="Joel">Joel</option><option value="Amós">Amós</option><option value="Obadias">Obadias</option><option value="Jonas">Jonas</option><option value="Miqueias">Miqueias</option><option value="Naum">Naum</option><option value="Habacuque">Habacuque</option><option value="Sofonias">Sofonias</option><option value="Ageu">Ageu</option><option value="Zacarias">Zacarias</option><option value="Malaquias">Malaquias</option>
+                    </optgroup>
+                    <optgroup label="Novo Testamento">
+                        <option value="Mateus">Mateus</option><option value="Marcos">Marcos</option><option value="Lucas">Lucas</option><option value="João">João</option><option value="Atos">Atos</option><option value="Romanos">Romanos</option><option value="1 Coríntios">1 Coríntios</option><option value="2 Coríntios">2 Coríntios</option><option value="Gálatas">Gálatas</option><option value="Efésios">Efésios</option><option value="Filipenses">Filipenses</option><option value="Colossenses">Colossenses</option><option value="1 Tessalonicenses">1 Tessalonicenses</option><option value="2 Tessalonicenses">2 Tessalonicenses</option><option value="1 Timóteo">1 Timóteo</option><option value="2 Timóteo">2 Timóteo</option><option value="Tito">Tito</option><option value="Filemom">Filemom</option><option value="Hebreus">Hebreus</option><option value="Tiago">Tiago</option><option value="1 Pedro">1 Pedro</option><option value="2 Pedro">2 Pedro</option><option value="1 João">1 João</option><option value="2 João">2 João</option><option value="3 João">3 João</option><option value="Judas">Judas</option><option value="Apocalipse">Apocalipse</option>
+                    </optgroup>
+                </select>
+                <input type="number" id="capInput" value="1" min="1">
+                <button class="action-btn" onclick="getBible()">ABRIR BÍBLIA</button>
             </div>
+            <button class="action-btn" style="background:#009ee3; color:white; font-size:12px;" onclick="handleExternalLink('https://mpago.la/126sWfx')">OFERTAR VIA MERCADO PAGO</button>
         </section>
 
-        <section id="escala" class="section">
-            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:20px">
-                <h1>Escalas de Culto</h1>
-                <button class="btn-action no-print" style="background:var(--dark)" onclick="window.print()">🖨️ Imprimir</button>
-            </div>
-            
-            <div class="card admin-only no-print">
-                <h3>Novo Culto na Escala</h3>
-                <div class="grid">
-                    <input type="date" id="e-data">
-                    <select id="e-dep">
-                        <option value="">Departamento Responsável...</option>
-                        <option>Culto Oficial</option>
-                        <option>Departamento Infantil</option>
-                        <option>Jovens</option>
-                        <option>Círculo de Oração</option>
-                        <option>Missões</option>
-                        <option>Culto de Oração</option>
-                        <option>Culto de Libertação</option>
-                        <option>Culto no Lar</option>
-                    </select>
-                    <input type="text" id="e-p1" placeholder="Porteiro(a)">
-                    <input type="text" id="e-dir" placeholder="Dirigente (1ª Parte)">
-                    <input type="text" id="e-pre" placeholder="Pregador(a)">
-                </div>
-                <button class="btn-action" onclick="addScale()">Salvar Escala</button>
-            </div>
-
-            <div class="card">
-                <table id="table-escala-print">
-                    <thead>
-                        <tr>
-                            <th>Data</th>
-                            <th>Culto / Departamento</th>
-                            <th>Porteiro</th>
-                            <th>Dirigente (1ª Parte)</th>
-                            <th>Pregador</th>
-                            <th class="admin-only admin-only-table">Ação</th>
-                        </tr>
-                    </thead>
-                    <tbody id="body-e"></tbody>
-                </table>
-            </div>
+        <section id="view-leitura" class="view-section">
+            <div class="progress-container"><div class="progress-bar" id="progressBar"></div></div>
+            <div class="swipe-guide">← ARRASTE PARA MUDAR DE CAPÍTULO →</div>
+            <div id="bibleContent"></div>
         </section>
 
-        <section id="gestao" class="section creator-only">
-            <h1>Gestão de Oficiais</h1>
-            <div class="card"><table style="width:100%"><thead><tr><th>Nome</th><th>E-mail</th><th>Status</th><th>Ação</th></tr></thead><tbody id="body-gestao"></tbody></table></div>
+        <section id="view-esboços" class="view-section">
+            <input type="text" id="sermonTitle" placeholder="Título da Pregação">
+            <textarea id="sermonText" style="height: 150px;" placeholder="Conteúdo do esboço..."></textarea>
+            <button class="action-btn" onclick="saveSermon()">SALVAR NOVO ESBOÇO</button>
+            <div id="sermonList" style="margin-top: 20px;"></div>
         </section>
 
-        <section id="conf" class="section admin-only">
-            <h1>Configurações</h1>
-            <div class="card" style="max-width:400px">
-                <label>Chave de Acesso dos Membros</label>
-                <input type="text" id="conf-key">
-                <button class="btn-action" style="width:100%; margin-top:10px" onclick="updateKey()">Salvar</button>
-            </div>
+        <section id="view-dicionario" class="view-section">
+            <input type="text" id="dicInput" placeholder="Termo teológico...">
+            <button class="action-btn" onclick="searchDic()">PESQUISAR</button>
+        </section>
+        <section id="view-estudos" class="view-section">
+            <input type="text" id="apoInput" placeholder="Seita ou tema polêmico...">
+            <button class="action-btn" style="background:#1e3c72; color:white;" onclick="searchApo()">CACP</button>
+        </section>
+        <section id="view-biblioteca" class="view-section">
+            <input type="text" id="libInput" placeholder="Livros no Telegram...">
+            <button class="action-btn" style="background:#0088cc; color:white;" onclick="searchLibrary()">TELEGRAM</button>
         </section>
     </main>
-</div>
 
-<script>
-    let isAdmin = false;
-    let isCreator = false;
+    <div class="overlay" id="overlay" onclick="closeNote()"></div>
+    <div id="notePopup">
+        <h3 id="noteTitle" style="color:var(--gold); font-size: 14px; margin-bottom: 10px;">Anotação</h3>
+        <textarea id="noteText" style="height: 120px; font-size: 14px;"></textarea>
+        <button class="action-btn" onclick="saveNote()">SALVAR NOTA</button>
+    </div>
 
-    let db = JSON.parse(localStorage.getItem('rcid_master_final')) || {
-        members: [], escalas: [], cartazes: [], secrets: [], config: { visitorKey: "RCId" }
-    };
+    <div id="readingOverlay">
+        <button onclick="closeReading()" style="background:var(--gold); color:#000; border:none; padding:10px 20px; border-radius:10px; font-weight:bold; margin-bottom:20px; float:right;">FECHAR</button>
+        <div id="readingContent">
+            <h2 class="reading-title" id="readTitle">Título</h2>
+            <div class="reading-body" id="readBody"></div>
+        </div>
+    </div>
 
-    function showVisitorLogin() { document.getElementById('sec-login-box').style.display = 'none'; document.getElementById('visitor-box').style.display = 'block'; }
-    function showDefaultLogin() { document.getElementById('sec-login-box').style.display = 'block'; document.getElementById('visitor-box').style.display = 'none'; }
-    function toggleSecAction(mode) { document.getElementById('sec-login-box').style.display = mode === 'login' ? 'block' : 'none'; document.getElementById('sec-reg-box').style.display = mode === 'reg' ? 'block' : 'none'; }
+    <script>
+        let currentKey = "";
+        let touchstartX = 0;
+        let touchendX = 0;
 
-    function registerSecretario() {
-        const email = document.getElementById('reg-email').value;
-        const ehPrimeiro = db.secrets.length === 0;
-        db.secrets.push({ nome: document.getElementById('reg-nome').value, email, pass: document.getElementById('reg-pass').value, aprovado: ehPrimeiro, criador: ehPrimeiro });
-        sync(); alert(ehPrimeiro ? "Você é o Criador!" : "Solicitação enviada!"); toggleSecAction('login');
-    }
+        window.onload = () => { renderSermons(); updateProgressBar(); };
 
-    function loginSecretario() {
-        const u = db.secrets.find(s => s.email === document.getElementById('sec-email').value && s.pass === document.getElementById('sec-pass').value);
-        if(u) { if(u.aprovado) { isAdmin = true; isCreator = u.criador; startApp(u.nome); } else { alert("Aguarde aprovação."); } } else { alert("Erro!"); }
-    }
+        function handleExternalLink(url) { window.open(url, '_system'); return false; }
 
-    function loginVisitor() { if(document.getElementById('visitor-key').value === db.config.visitorKey) { isAdmin = false; isCreator = false; startApp("Visitante"); } else { alert("Chave incorreta!"); } }
+        function switchView(id) {
+            document.querySelectorAll('.view-section').forEach(v => v.classList.remove('active'));
+            document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+            document.getElementById('view-' + id).classList.add('active');
+            const map = { 'home':0, 'leitura':1, 'esboços':2, 'dicionario':3, 'estudos':4, 'biblioteca':5 };
+            document.querySelectorAll('.tab-btn')[map[id]].classList.add('active');
+        }
 
-    function startApp(nome) {
-        document.getElementById('auth-screen').style.display = 'none'; document.getElementById('app-content').style.display = 'flex';
-        document.getElementById('user-info').innerText = nome;
-        if(isAdmin) document.getElementById('app-body').classList.add('is-admin');
-        if(isCreator) { document.getElementById('app-body').classList.add('is-creator'); document.getElementById('conf-key').value = db.config.visitorKey; }
-        render();
-    }
+        async function getBible() {
+            const book = document.getElementById('bookSelect').value;
+            const cap = document.getElementById('capInput').value;
+            const output = document.getElementById('bibleContent');
+            output.innerHTML = "<p style='text-align:center; color:var(--gold);'>Carregando...</p>";
+            switchView('leitura');
+            try {
+                const res = await fetch(`https://bible-api.com/${encodeURIComponent(book)} ${cap}?translation=almeida`);
+                const data = await res.json();
+                let html = `<h2 style="color:var(--gold); margin-bottom:15px; border-left:3px solid var(--gold); padding-left:10px;">${data.reference}</h2>`;
+                data.verses.forEach(v => {
+                    const k = `${data.reference}:${v.verse}`;
+                    const hasN = localStorage.getItem(k) ? 'has-note' : '';
+                    html += `
+                        <div class="verse-line ${hasN}">
+                            <span class="v-num">${v.verse}</span>
+                            <span>${v.text}</span>
+                            <span class="note-tag" onclick="openNote('${k}', '${v.verse}')">[Anotar]</span>
+                        </div>`;
+                });
+                output.innerHTML = html;
+                updateProgressBar();
+                document.getElementById('view-leitura').scrollTop = 0;
+            } catch(e) { 
+                output.innerHTML = "<p style='text-align:center; color:var(--danger);'>Erro ao carregar capítulo. Verifique sua conexão.</p>";
+            }
+        }
 
-    function sync() { localStorage.setItem('rcid_master_final', JSON.stringify(db)); render(); }
+        const bibleArea = document.getElementById('view-leitura');
+        bibleArea.addEventListener('touchstart', e => { touchstartX = e.changedTouches[0].screenX; });
+        bibleArea.addEventListener('touchend', e => { 
+            touchendX = e.changedTouches[0].screenX;
+            if (touchendX < touchstartX - 100) { document.getElementById('capInput').value++; getBible(); }
+            if (touchendX > touchstartX + 100) { let v = document.getElementById('capInput').value; if(v>1) { document.getElementById('capInput').value--; getBible(); } }
+        });
 
-    function addMember() {
-        db.members.push({ id: Date.now(), nome: document.getElementById('m-nome').value, cargo: document.getElementById('m-cargo').value, tel: document.getElementById('m-tel').value, end: document.getElementById('m-end').value });
-        sync(); ['m-nome','m-tel','m-end'].forEach(i => document.getElementById(i).value = '');
-    }
+        function openNote(key, num) {
+            currentKey = key;
+            document.getElementById('noteTitle').innerText = "Versículo " + num;
+            document.getElementById('noteText').value = localStorage.getItem(key) || "";
+            document.getElementById('notePopup').style.display = 'block';
+            document.getElementById('overlay').style.display = 'block';
+        }
+        function saveNote() {
+            const txt = document.getElementById('noteText').value;
+            if(txt.trim()) localStorage.setItem(currentKey, txt);
+            else localStorage.removeItem(currentKey);
+            closeNote();
+            getBible();
+        }
+        function closeNote() { document.getElementById('notePopup').style.display = 'none'; document.getElementById('overlay').style.display = 'none'; }
 
-    function addScale() {
-        db.escalas.push({ id: Date.now(), data: document.getElementById('e-data').value, dep: document.getElementById('e-dep').value, p1: document.getElementById('e-p1').value, dir: document.getElementById('e-dir').value, pre: document.getElementById('e-pre').value });
-        db.escalas.sort((a,b) => new Date(a.data) - new Date(b.data));
-        sync();
-    }
+        function saveSermon() {
+            const title = document.getElementById('sermonTitle').value || "Sermão " + new Date().toLocaleDateString();
+            const text = document.getElementById('sermonText').value;
+            if(!text) return alert("Escreva algo!");
+            let sermons = JSON.parse(localStorage.getItem('rcid_sermons_list') || "[]");
+            sermons.push({ id: Date.now(), title, text });
+            localStorage.setItem('rcid_sermons_list', JSON.stringify(sermons));
+            document.getElementById('sermonTitle').value = ""; document.getElementById('sermonText').value = "";
+            renderSermons();
+        }
+        function renderSermons() {
+            const listArea = document.getElementById('sermonList');
+            let sermons = JSON.parse(localStorage.getItem('rcid_sermons_list') || "[]");
+            listArea.innerHTML = '<h3 style="font-size: 14px; color: var(--gold); margin-bottom: 10px;">MEUS SERMÕES SALVOS</h3>';
+            sermons.forEach((s) => {
+                const div = document.createElement('div');
+                div.className = 'sermon-item';
+                div.innerHTML = `<span onclick="openReading(${s.id})" style="flex:1;">${s.title}</span><span class="delete-btn" onclick="deleteSermon(${s.id})">X</span>`;
+                listArea.appendChild(div);
+            });
+        }
+        function deleteSermon(id) {
+            if(confirm("Excluir esboço?")) {
+                let sermons = JSON.parse(localStorage.getItem('rcid_sermons_list') || "[]");
+                sermons = sermons.filter(s => s.id !== id);
+                localStorage.setItem('rcid_sermons_list', JSON.stringify(sermons));
+                renderSermons();
+            }
+        }
+        function openReading(id) {
+            let sermons = JSON.parse(localStorage.getItem('rcid_sermons_list') || "[]");
+            let s = sermons.find(item => item.id === id);
+            document.getElementById('readTitle').innerText = s.title;
+            document.getElementById('readBody').innerText = s.text;
+            document.getElementById('readingOverlay').style.display = 'block';
+        }
+        function closeReading() { document.getElementById('readingOverlay').style.display = 'none'; }
 
-    function render() {
-        document.getElementById('mural-container').innerHTML = db.cartazes.map(c => `<div class="card" style="padding:10px"><img src="${c.img}" style="width:100%; border-radius:10px"><div style="display:flex; justify-content:space-between; margin-top:10px"><span>${c.tit}</span><button class="admin-only" onclick="del('cartazes', ${c.id})" style="color:red; background:none; border:none">🗑️</button></div></div>`).join('');
-        
-        document.getElementById('body-m').innerHTML = db.members.map(m => `<tr><td><strong>${m.nome}</strong></td><td>${m.cargo}</td><td class="admin-only admin-only-table">${m.end}<br><a href="https://wa.me/55${m.tel.replace(/\D/g,'')}" target="_blank" class="btn-whatsapp">WhatsApp</a></td><td class="admin-only admin-only-table"><button onclick="del('members', ${m.id})" style="color:red; border:none; background:none">Excluir</button></td></tr>`).join('');
+        function updateProgressBar() {
+            let perc = (document.getElementById('capInput').value / 50 * 100);
+            document.getElementById('progressBar').style.width = Math.min(perc, 100) + "%";
+        }
 
-        document.getElementById('body-e').innerHTML = db.escalas.map(e => `<tr><td>${e.data.split('-').reverse().join('/')}</td><td><strong>${e.dep}</strong></td><td>${e.p1}</td><td>${e.dir}</td><td><strong>${e.pre}</strong></td><td class="admin-only admin-only-table"><button onclick="del('escalas', ${e.id})" style="color:red; border:none; background:none">X</button></td></tr>`).join('');
-
-        if(isCreator) { document.getElementById('body-gestao').innerHTML = db.secrets.map(s => s.criador ? '' : `<tr><td>${s.nome}</td><td>${s.email}</td><td>${s.aprovado ? 'ATIVO' : 'PENDENTE'}</td><td><button onclick="toggleStatus('${s.email}')">${s.aprovado ? 'Bloquear' : 'Aprovar'}</button></td></tr>`).join(''); }
-    }
-
-    function toggleStatus(email) { const s = db.secrets.find(x => x.email === email); s.aprovado = !s.aprovado; sync(); }
-    function uploadCartaz() { const f = document.getElementById('cartaz-file').files[0]; const r = new FileReader(); r.onload = e => { db.cartazes.unshift({id: Date.now(), img: e.target.result, tit: document.getElementById('cartaz-titulo').value}); sync(); }; if(f) r.readAsDataURL(f); }
-    function del(t, id) { if(confirm("Remover?")) { db[t] = db[t].filter(i => i.id !== id); sync(); } }
-    function tab(id, btn) { document.querySelectorAll('.section').forEach(s => s.classList.remove('active')); document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active')); document.getElementById(id).classList.add('active'); btn.classList.add('active'); }
-    function updateKey() { db.config.visitorKey = document.getElementById('conf-key').value; sync(); alert("OK!"); }
-</script>
+        function searchDic() { const q = document.getElementById('dicInput').value; if(q) handleExternalLink(`https://casadosenhor.com.br/dicionario/?s=${encodeURIComponent(q)}`); }
+        function searchApo() { const q = document.getElementById('apoInput').value; if(q) handleExternalLink(`https://www.cacp.app.br/?s=${encodeURIComponent(q)}`); }
+        function searchLibrary() { const q = document.getElementById('libInput').value; handleExternalLink(q ? `https://t.me/s/livrosgratuitos?q=${encodeURIComponent(q)}` : `https://t.me/livrosgratuitos`); }
+    </script>
 </body>
 </html>
+w
